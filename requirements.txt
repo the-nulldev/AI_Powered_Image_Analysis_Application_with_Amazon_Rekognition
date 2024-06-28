@@ -1,0 +1,5 @@
+https://github.com/hyperskill/hs-test-python/archive/release.tar.gz
+requests==2.32.3
+boto3==1.34.133
+Flask
+python-dotenv

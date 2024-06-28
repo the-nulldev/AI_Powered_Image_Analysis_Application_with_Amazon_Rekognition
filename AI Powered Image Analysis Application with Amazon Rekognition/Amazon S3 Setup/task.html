@@ -1,0 +1,129 @@
+<h2>Theory</h2>
+
+<p>Our application needs a reliable and scalable place to store data, especially as it involves handling thousands of photos. We do not want to deal with the management of the storage system as it can be expensive to maintain and scale. We will use <strong>Amazon Simple Storage Service (Amazon S3)</strong> service to meet our storage needs. This way, we can store and manage data without worrying about the underlying infrastructure.</p>
+
+<p>Amazon S3 is an object storage service that offers industry-leading scalability, data availability, security, and performance. This means customers of all sizes and industries can use it to store and protect any amount of data for a range of use cases. These include websites, mobile applications, backup and restore, archiving, enterprise applications, IoT devices, and big data analytics.</p>
+
+<p><strong>Key Features of Amazon S3:</strong></p>
+
+<ul>
+	<li>Scalability: Automatically scales to handle any amount of data, from a few kilobytes to petabytes of data;</li>
+	<li>Durability and Availability: Designed for 99.999999999% (11 9's) durability and 99.99% availability of objects over a given year;</li>
+	<li>Low Latency: Provides low-latency access to data, making it suitable for a wide range of applications.</li>
+</ul>
+
+<p><strong>Working with Amazon S3:</strong></p>
+
+<p>To use S3, you first need to create a <strong>bucket</strong>. As the name suggests, it is a container for storing <strong>objects</strong> (files). Buckets must have a unique name across all AWS accounts and regions. You can create a bucket using the AWS Management Console, AWS CLI, or SDKs. When creating a bucket, you can specify the region where the bucket will be created. This can affect latency and costs. </p>
+
+<p>You can create a bucket by navigating to the S3 console and following the steps to create a bucket. You can also use SDKs and CLI commands. The command below creates a bucket in the us-east-1 region:</p>
+
+<pre><code class="language-bash">aws s3 mb s3://your-unique-bucket-name --region us-east-1</code></pre>
+
+<p>Once you have a bucket, you can upload files (objects) to it. Each object in a bucket has a unique key (name) and is stored in a flat namespace within the bucket. You can upload files using the AWS Management Console,  SDKs, or CLI commands:</p>
+
+<pre><code class="language-bash">aws s3 cp /path/to/your/image.jpg s3://your-unique-bucket-name/image.jpg</code></pre>
+
+<p>When uploading a file, you can specify metadata and permissions for the object.</p>
+
+<p><strong>Storage Types:</strong></p>
+
+<p>Amazon S3 offers different storage classes to help you optimize costs based on how frequently you need to access your data and your data's retention period:</p>
+
+<table>
+	<thead>
+	<tr>
+		<th><strong>Storage Class</strong></th>
+		<th><strong>Description</strong></th>
+		<th><strong>Use Case</strong></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td><strong>S3 Standard</strong></td>
+		<td>High durability, availability, and performance for frequently accessed data.</td>
+		<td>Frequently accessed data such as dynamic websites, content distribution, and mobile apps.</td>
+	</tr>
+	<tr>
+		<td><strong>S3 Intelligent-Tiering</strong></td>
+		<td>Automatically moves data between two access tiers (frequent and infrequent) based on changing access patterns.</td>
+		<td>Data with unpredictable access patterns, optimizing storage costs without performance impact.</td>
+	</tr>
+	<tr>
+		<td><strong>S3 Standard-IA</strong></td>
+		<td>Lower-cost storage for data that is accessed less frequently but requires rapid access when needed.</td>
+		<td>Infrequently accessed data such as backups and long-term storage for disaster recovery.</td>
+	</tr>
+	<tr>
+		<td><strong>S3 One Zone-IA</strong></td>
+		<td>Low-cost option for infrequently accessed data that does not require multiple Availability Zone resilience.</td>
+		<td>Infrequently accessed data that can be recreated if the Availability Zone is destroyed.</td>
+	</tr>
+	<tr>
+		<td><strong>S3 Glacier</strong></td>
+		<td>Low-cost storage for data archiving with retrieval times ranging from minutes to hours.</td>
+		<td>Long-term data archiving, digital preservation, and backup with infrequent access.</td>
+	</tr>
+	<tr>
+		<td><strong>S3 Glacier Deep Archive</strong></td>
+		<td>Lowest-cost storage class designed for long-term retention of data that is rarely accessed, with retrieval times within 12 hours.</td>
+		<td>Long-term data archiving and digital preservation for data that is rarely, if ever, accessed.</td>
+	</tr>
+	</tbody>
+</table>
+
+<p>For more details, refer to the <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html" rel="noopener noreferrer nofollow" style="font-size: inherit; font-weight: inherit;">Storage Classes documentation</a>.</p>
+
+<p><strong>Security:</strong></p>
+
+<p>Security is a critical aspect of Amazon S3. Here are some key security features:</p>
+
+<ol>
+	<li>
+		<p><strong>Access Control</strong>: By default, all S3 buckets and objects are private. You can control access using:</p>
+
+		<ul>
+			<li><strong>Bucket Policies</strong>: JSON documents defining allowed or denied actions on the bucket and its objects.</li>
+			<li><strong>Access Control Lists (ACLs)</strong>: Define individual permissions for objects within a bucket.</li>
+			<li><strong>IAM Policies</strong>: Manage permissions for users and roles within your AWS account.</li>
+		</ul>
+	</li>
+	<li>
+		<p><strong>Encryption</strong>: S3 offers multiple options for encrypting data at rest and in transit:</p>
+
+		<ul>
+			<li><strong>Server-Side Encryption (SSE)</strong>: Amazon S3 manages the encryption keys.</li>
+			<li><strong>Client-Side Encryption</strong>: You manage the encryption keys and encrypt data before uploading.</li>
+		</ul>
+	</li>
+	<li>
+		<p><strong>Logging and Monitoring</strong>: S3 integrates with AWS CloudTrail for logging API calls and provides access logs for monitoring bucket access. Use Amazon CloudWatch for monitoring and setting alarms.</p>
+	</li>
+	<li>
+		<p><strong>Bucket Versioning</strong>: Helps preserve, retrieve, and restore every version of objects stored in an S3 bucket, adding a layer of protection against accidental deletions and overwrites.</p>
+	</li>
+</ol>
+
+<p>For more information, refer to the <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html" rel="noopener noreferrer nofollow">Amazon S3 Security Best Practices</a>.</p>
+
+<p>By understanding these foundational concepts, you will be better equipped to utilize Amazon S3 effectively and securely for your image analysis application.</p>
+
+<h2>Description</h2>
+
+<p>In this stage, you will create an S3 bucket to store images that Amazon Rekognition will process. The bucket and its objects must be public to allow access to them from the internet. You will also upload an example image to the bucket. </p>
+
+<h2>Objectives</h2>
+
+<p>At this stage, you should:</p>
+
+<ul>
+	<li>Create an S3 bucket with a unique name. Use the AWS Management Console or AWS CLI to create the bucket. Choose the <code>us-east-1</code> region where your objects will live;</li>
+	<li>Upload this <a href="https://cogniterra.org/media/attachments/lesson/38306/carrots.jpg" rel="noopener noreferrer nofollow">example image</a> to the newly created S3 bucket. You can use the AWS Management Console or AWS CLI to upload the image. Ensure the image is uploaded successfully;</li>
+	<li>Make the bucket and its objects public. Set the bucket policy to make the bucket public. Ensure that the bucket policy allows public read access to all objects in the bucket.</li>
+</ul>
+
+<p>Retrieve the URL of the S3 image you uploaded and provide it in <code>main.py</code> file in the following format:</p>
+
+<pre><code class="language-bash">object_url = "https://your-unique-bucket-name.s3.amazonaws.com/object-name"</code></pre>
+
+<p>Ensure that the object URL points to the correct object and that the bucket and its objects are publicly accessible.</p>

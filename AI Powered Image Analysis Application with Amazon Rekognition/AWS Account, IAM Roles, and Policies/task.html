@@ -1,0 +1,178 @@
+<h2>Description</h2>
+
+<p>Imagine a platform where farmers can sell their vegetables directly to buyers. This platform would allow farmers to upload images of their produce, and buyers can see what&#39;s available before placing an order. We want to ensure that only images of certain vegetables make it to our site and that the images are of high quality.&nbsp;</p>
+
+<p>To make this a reality, should we manually analyze every image that a farmer uploads? Definitely not. We need a robust system that can automatically verify and analyze these images when they are uploaded, but before they are publicly visible on our site. This is where Amazon Rekognition comes into play. By the end of this project, you&#39;ll have built an image analysis tool that ensures only high-quality images of vegetables are uploaded to our vegetable sales website.</p>
+
+<p>Don&#39;t worry if you are not a software developer. All the needed code snippets will be provided for you. All you need to do is implement the AWS infrastructure needed to support this application. Below is a diagram representing what you will be building:</p>
+
+<p style="text-align:center"><img alt="Architecture diagram for an Image analysis application with Amazon Rekognition" height="509" name="image.png" src="https://ucarecdn.com/e31af912-ab13-4d03-a98e-1460054ca1a7/" width="1244" /></p>
+
+<p>As you can see, we will be utilizing the various cloud services:</p>
+
+<ul>
+    <li>AWS IAM for security;</li>
+    <li>Amazon S3 to store images;</li>
+    <li>Amazon Rekognition to analyze images;</li>
+    <li>AWS Lambda to link the services;</li>
+    <li>AWS SDK for Python to interact with cloud services programmatically;</li>
+    <li>Amazon SQS to send the results back to our application.</li>
+</ul>
+
+<p>[ALERT-warning] As part of the free tier, the services created as part of this project will not cost you anything. However, if your free tier period has ended, you will incur a small charge for some services. If possible, feel free to set up&nbsp;<a href="https://github.com/localstack/localstack" rel="noopener noreferrer nofollow">localstack</a> thus avoiding using the real AWS environment for practice.&nbsp;[/ALERT]</p>
+
+<p>Let&#39;s begin by ensuring that our environment is secure. In this first stage, you&#39;ll lay the groundwork by setting up your AWS environment. This involves creating the necessary users, roles, and permissions that will allow your application to interact with various AWS services. This will allow your application to save images to Amazon S3 and read messages from an Amazon SQS queue. Additionally, it will allow your Lambda function to read from the S3 bucket, call Rekognition to analyze images, send logs to AWS CloudWatch, and place the results in an SQS queue.&nbsp;</p>
+
+<h2>Objectives</h2>
+
+<p>To get started, we&#39;ll focus on setting up users, roles, and policies. Here&#39;s what you need to do:</p>
+
+<ul>
+    <li>Create an AWS Free Tier account &mdash; If you don&#39;t already have one, sign up for an AWS Free Tier account;</li>
+    <li>Install the AWS CLI locally &mdash;&nbsp;This will allow you to interact with AWS services from your local machine;</li>
+    <li>Create a user and name them <code>RekognitionAppUser</code> with console access disabled;</li>
+    <li>Create an IAM role and name it <code>LambdPermissionsRole</code>;</li>
+    <li>Create IAM Policies;</li>
+</ul>
+
+<p>Since we have not created any resources yet, these policies should apply to all resources. Later, we will adjust them to allow actions only on specific resources. Create the following policies:</p>
+
+<ul>
+    <li>
+        <p><code>UserAccessPolicy</code> with the following permissions:</p>
+
+        <ul>
+            <li>
+                <p><code>S3:PutObject</code> - allows the application to upload images to Amazon S3.</p>
+            </li>
+            <li>
+                <p><code>sqs:ReceiveMessage</code> - allows the application to read messages from an SQS queue;</p>
+            </li>
+            <li>
+                <p><code>sqs:DeleteMessage</code> - allows the application to delete the read messages from an SQS queue;</p>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<ul>
+    <li>
+        <p><code>LambdaAccessPolicy</code> with the following permissions:</p>
+
+        <ul>
+            <li>
+                <p><code>s3:GetObject</code> - allows Lambda to retrieve image files from Amazon S3;</p>
+            </li>
+            <li>
+                <p><code>rekognition:DetectLabels</code> - allows Lambda to call Amazon Rekognition to detect labels in an image;</p>
+            </li>
+            <li>
+                <p><code>sqs:SendMessage</code> - allows Lambda to write analysis results to a queue;</p>
+            </li>
+            <li>
+                <p><code>logs:CreateLogGroup</code> -&nbsp; allows Lambda to create CloudWatch logs;</p>
+            </li>
+            <li>
+                <p><code>logs:CreateLogStream</code> - allows Lambda to create CloudWatch log streams;</p>
+            </li>
+            <li>
+                <p><code>logs:PutLogEvents</code> - allows Lambda to send event data to CloudWatch logs.</p>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<p>Once you have policies created, attach the policy <code>UserAccessPolicy</code> to the user <code>RekognitionAppUser</code>. Then, attach the policy <code>LambdaAccessPolicy </code>to the role <code>LambdaPermissionsRole</code>. Later, when you create the Lambda function, you will attach this role to it.</p>
+
+<p>Generate an access key pair for&nbsp;<code>RekognitionAppUser</code>&nbsp;and configure your AWS CLI with these credentials using the profile name&nbsp;<code>Hyperprofile</code>:</p>
+
+<pre>
+<code class="language-bash">$ aws configure --profile Hyperprofile
+AWS Access Key ID:
+AWS Secret Access Key:
+Default region name: us-east-1
+Default output format: json</code></pre>
+
+<p>Once you have the resources in place, run the following commands on your AWS CLI or CloudShell to retrieve information about your users, policies, and roles. This will provide JSON output with the relevant information about them. Then, provide the JSON outputs as the answers to this task in the appropriate variables below. The <code>--query</code> parameter is structured to retrieve only the relevant information for this project.&nbsp;</p>
+
+<p>user_json:</p>
+
+<pre>
+<code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+
+aws iam get-user --user-name RekognitionAppUser \
+    --query 'User.{UserName:UserName,CreateDate:CreateDate}' \
+    --region us-east-1 \
+    --output json
+</code></pre>
+
+<p>role_json:</p>
+
+<pre>
+<code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+
+aws iam get-role \
+    --role-name LambdaPermissionsRole \
+    --query 'Role.{RoleName:RoleName,CreateDate:CreateDate}' \
+    --region us-east-1 \
+    --output json</code></pre>
+
+<p>user_policy_json:</p>
+
+<pre>
+<code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+# replace &lt;account_id&gt; with your account ID
+
+aws iam get-policy \
+    --policy-arn arn:aws:iam::&lt;account_id&gt;:policy/UserAccessPolicy \
+    --query 'Policy.{PolicyName:PolicyName,PolicyId:PolicyId,CreateDate:CreateDate}' \
+    --region us-east-1 --output json</code></pre>
+
+<p>lambda_policy_json:</p>
+
+<pre>
+<code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+# replace &lt;account_id&gt; with your account ID
+
+aws iam get-policy \
+    --policy-arn arn:aws:iam::&lt;account_id&gt;:policy/LambdaAccessPolicy \
+    --query 'Policy.{PolicyName:PolicyName,PolicyId:PolicyId,CreateDate:CreateDate}' \
+    --region us-east-1 \
+    --output json</code></pre>
+
+<p>user_policy_entities_json:</p>
+
+<pre>
+<code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+# replace &lt;account_id&gt; with your account ID
+
+aws iam list-entities-for-policy \
+    --policy-arn arn:aws:iam::&lt;account-id&gt;:policy/UserAccessPolicy \
+    --query '{UserAccessPolicy:{AttachedEntities:{Users:PolicyUsers[].UserName, Roles:PolicyRoles[].RoleName, Groups:PolicyGroups[].GroupName}}}' \
+    --region us-east-1 \
+    --output json
+</code></pre>
+
+<p>lambda_policy_entities_json:</p>
+
+<pre>
+<code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+# replace &lt;account_id&gt; with your account ID
+
+aws iam list-entities-for-policy \
+    --policy-arn arn:aws:iam::&lt;account-id&gt;:policy/LambdaAccessPolicy \
+    --query '{LambdaAccessPolicy:{AttachedEntities:{Users:PolicyUsers[].UserName, Roles:PolicyRoles[].RoleName, Groups:PolicyGroups[].GroupName}}}' \
+    --region us-east-1 \
+    --output json</code></pre>
+
+<p>Note that the user running these commands must have these permissions:&nbsp;<code>iam:GetUser</code>, <code>iam:GetRole</code>, and <code>iam:GetPolicy</code> attached. Do not modify the variables in <code>main.py</code>&nbsp;or the triple quotes surrounding the JSON reply.&nbsp;</p>
+
+<h2>Examples</h2>
+
+<p><strong>Example 1:</strong></p>
+
+<p style="text-align:center"><img alt="UserAccessPolicy" height="295" name="image.png" src="https://ucarecdn.com/fcb159d3-f6b1-4254-82be-294f387275bb/" width="550" /></p>
+
+<p><strong>Example 2:&nbsp;</strong></p>
+
+<p style="text-align:center"><img alt="LambdaAccessPolicy statement" height="342" name="image.png" src="https://ucarecdn.com/2705292a-72f7-45f0-86ed-6aafd6893559/" width="550" /></p>

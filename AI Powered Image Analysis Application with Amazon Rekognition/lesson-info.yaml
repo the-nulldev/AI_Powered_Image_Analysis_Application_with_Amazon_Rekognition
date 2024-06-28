@@ -1,0 +1,7 @@
+type: framework
+content:
+  - AWS Account, IAM Roles, and Policies
+  - Amazon S3 Setup
+  - Image Analysis with Amazon Rekognition
+  - AWS Lambda Integration
+  - SQS and Web Application Integration

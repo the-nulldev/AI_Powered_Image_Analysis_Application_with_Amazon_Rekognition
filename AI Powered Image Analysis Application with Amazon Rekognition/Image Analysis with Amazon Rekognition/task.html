@@ -1,0 +1,69 @@
+<h2>Theory</h2>
+
+<p>Our application needs to automatically analyze the images stored in S3 to ensure that only high-quality pictures of the right types of produce make it through. To achieve this, we will be leveraging <strong>Amazon Rekognition.</strong> This is an image and video analysis service provided by AWS. It uses deep learning models to identify objects, people, text, scenes, and activities in images and videos, as well as to detect any inappropriate content. Let's discuss some key features and capabilities of Amazon Rekognition.</p>
+
+<p><strong>Label Detection</strong>: This feature identifies objects, people, text, scenes, and activities in images. For example, it can detect objects like cars, trees, and furniture, or activities like running and dancing. You can use the console, SDKs, or CLI commands to detect labels in an image. For instance, to detect images in a file cow.jpg stored in Amazon S3, you could use the following command:</p>
+
+<pre><code class="language-bash"># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+
+aws rekognition detect-labels \
+   --image '{"S3Object":{"Bucket":"your-unique-bucket-name","Name":"cow.jpg"}}' \
+   --region us-east-1</code></pre>
+
+<p><strong>Face Detection and Analysis</strong>: Amazon Rekognition can detect faces in images and videos and analyze attributes such as age range, gender, emotions, and more. It can also compare faces to determine if they are the same person. Again, you can use any tool you like to interact with the DetectFaces API:</p>
+
+<pre><code># if you use PowerShell as your shell, replace backslashes (\) with backticks (`) as line seperators
+
+aws rekognition detect-faces \
+    --image '{"S3Object":{"Bucket":"your-unique-bucket-name","Name":"example.jpg"}}' \
+    --attributes "ALL" \
+    --region us-east-1</code></pre>
+
+<p><strong>Face Comparison</strong>: This feature allows you to compare a face in an image with faces in another image or in a collection of faces. Here's a CLI command to achieve this:</p>
+
+<pre><code class="language-bash">aws rekognition compare-faces \
+    --source-image '{"S3Object":{"Bucket":"your-unique-bucket-name","Name":"source.jpg"}}' \
+    --target-image '{"S3Object":{"Bucket":"your-unique-bucket-name","Name":"target.jpg"}}' \
+    --region us-east-1</code></pre>
+
+<p><strong>Text in Image</strong>: Amazon Rekognition can detect and recognize text in images, which is useful for extracting information from documents, street signs, or product labels.</p>
+
+<p><strong>Celebrity Recognition</strong>: This feature identifies celebrities in images and videos. It can recognize thousands of famous personalities from various fields. Try it out by uploading a celebrity's image to an S3 bucket and running the following CLI command:</p>
+
+<pre><code class="language-bash">aws rekognition recognize-celebrities \
+    --image '{"S3Object":{"Bucket":"your-unique-bucket-name","Name":"celebrity.jpg"}}' \
+    --region us-east-1</code></pre>
+
+<p><strong>Custom Labels</strong>: You can train Amazon Rekognition to detect custom labels specific to your business needs, such as identifying machine parts or analyzing medical images. </p>
+
+<p><strong>Video Analysis</strong>: Amazon Rekognition can analyze videos to detect activities, people, objects, and more. It can also track the movement of objects and people across frames. This is important for surveillance systems. </p>
+
+<p><strong>Content Moderation</strong>: This feature helps to detect inappropriate content in images and videos, such as nudity or violence, making it easier to moderate user-generated content.</p>
+
+<p>The response from Amazon Rekognition includes a list of detected labels, each with a name, confidence score, and additional details. The confidence score is a measure of how certain the model is about the label it has detected, expressed as a percentage. Higher confidence scores indicate greater certainty. For example, a confidence score of 98.5% for the label "Car" means the model is very certain that the object in the image is a car.  </p>
+
+<p>Given a photo of Meryl Streep, Amazon Rekognition was able to identify her:</p>
+
+<p style="text-align: center;"><img alt="Output of recognize-celebrities API call showing correct identification of Meryl Streep by Amazon Rekognition. " height="332" name="image.png" src="https://ucarecdn.com/3a1da1bd-ec85-4b24-9201-8e7d19f92403/" width="540"></p>
+
+<p>Go ahead and analyze images using the console, SDKs, and CLI commands. </p>
+
+<h2>Description</h2>
+
+<p>In this stage, you will harness the power of Amazon Rekognition to detect labels in an example <a href="https://cogniterra.org/media/attachments/lesson/38306/tomatoes.jpg" rel="noopener noreferrer nofollow">image of tomatoes</a>. Your task is to utilize this image analysis service and provide the JSON response from the label detection API call. You can use the CLI or console to achieve this. </p>
+
+<h2>Objectives</h2>
+
+<p>Your mission, should you choose to accept it, involves a few steps:</p>
+
+<ul>
+  <li>Set Up Amazon Rekognition: Ensure you have the necessary permissions to use Amazon Rekognition. You can use the AWS Management Console to interact with the service;</li>
+  <li>Detect Labels in the Image: Use the Amazon Rekognition `detect_labels` API to analyze the example <a href="https://cogniterra.org/media/attachments/lesson/38306/tomatoes.jpg" rel="noopener noreferrer nofollow">image of tomatoes</a>. You can also use <a href="https://console.aws.amazon.com/rekognition/" rel="noopener noreferrer nofollow">the console</a> to interact with the Rekognition service;</li>
+  <li>Provide the JSON Response: Once the image is analyzed, you will get a JSON response containing the labels that Rekognition identified. Provide that response between the triple quotes in the <code>main.py</code> file inside the <code>labels_json</code> variable.</li>
+</ul>
+
+<p>In your <code>main.py</code> file, you should have the following variable containing the JSON response:</p>
+
+<pre><code>labels_json = """
+
+"""</code></pre>

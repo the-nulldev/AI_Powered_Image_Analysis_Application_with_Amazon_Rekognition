@@ -1,0 +1,53 @@
+<h2>Description</h2>
+
+<p>Welcome to the next exciting stage of our AI-Powered Image Analysis Application! So far, you've harnessed the power of Amazon Rekognition to analyze images and detect labels. You've also probably tested if it can identify your favorite celebrity! Now, it's time to take it up a notch by integrating AWS Lambda into the workflow. AWS Lambda is a serverless computing service that lets you run code without provisioning or managing servers. Imagine having an invisible assistant that springs into action whenever a new image is uploaded to your S3 bucket – that's AWS Lambda for you!</p>
+
+<p>In this stage, your mission is to create a Lambda function that automatically triggers whenever a new image is uploaded to an Amazon S3 bucket. This function will use the Amazon Rekognition service to analyze the uploaded image and detect labels, ensuring that our application delivers top-notch results.</p>
+
+<h2>Objectives</h2>
+
+<p>For this stage, perform the following:</p>
+
+<ul>
+    <li>Create a Lambda Function: Open the Lambda console and set up a new function that runs on the Python 3.12 runtime. Name your function <code>ImageAnalysisFunction</code>;</li>
+    <li>Equip your Lambda function with the <code>LambdaPermissionsRole</code> that we created earlier. This role grants your function the necessary permissions to interact with other AWS services;</li>
+    <li>Once created, configure the trigger: Configure your Lambda function to automatically trigger whenever a new image is uploaded to a specified S3 bucket. This step ensures that your function is always alert and ready to analyze new images as soon as they arrive; </li>
+    <li>Add the code: For the code section, use the provided <a href="https://cogniterra.org/media/attachments/lesson/38306/lambda_function.py" rel="noopener noreferrer nofollow">Python code</a> which will use the Amazon Rekognition service to detect labels in the uploaded image. This is where the magic happens;</li>
+</ul>
+
+<p>Once everything is set up, test your function by uploading an image to the specified S3 bucket. For each image analyzed, your Lambda function logs the JSON response from the Rekognition service. These logs will provide valuable insights and allow you to verify that the image analysis is working as expected. Head over to CloudWatch logs to verify that the labels detected by Amazon Rekognition are being logged correctly for each image upload.</p>
+
+<p>To complete this stage, run the following commands to retrieve information about your function. Provide the responses in their appropriate variables in <code>main.py</code> file between the triple quotes: </p>
+
+<p><em>function_json</em>:</p>
+
+<pre><code class="language-bash"># if you use PowerShell as your shell, replace backslashes () with backticks (`) as line separators
+
+aws lambda get-function \
+    --function-name ImageAnalysisFunction \
+    --query 'Configuration {FunctionName:FunctionName,Runtime:Runtime,Role:Role,Handler:Handler,Timeout:Timeout,MemorySize:MemorySize}' \
+    --region us-east-1 \
+    --output json </code></pre>
+
+<p><em>logs_json</em>:</p>
+
+<pre><code class="language-bash"># if you use PowerShell as your shell, replace backslashes () with backticks (`) as line separators
+
+aws logs describe-log-streams --log-group-name /aws/lambda/ImageAnalysisFunction \
+    --query 'logStreams[*].{logStreamName:logStreamName,creationTime:creationTime}' \
+    --region us-east-1 \
+    --max-items 5 \
+    --output json
+</code></pre>
+
+<p>The function json command will return your account ID in the Role arn. Replace it with <code>0123456789012</code> before submitting. </p>
+
+<p>Your <code>main.py</code> file should have the following variables formatted as shown below:</p>
+
+<pre><code class="language-bash">function_json = """
+
+"""
+
+logs_json = """
+
+"""</code></pre>

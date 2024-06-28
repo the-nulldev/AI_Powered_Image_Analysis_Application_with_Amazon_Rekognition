@@ -1,0 +1,28 @@
+<h2>Description</h2>
+
+<p>Now, let&#39;s finalize our AI-Powered Image Analysis Application! So far, you&#39;ve integrated Amazon Rekognition and AWS Lambda to automatically analyze images uploaded to an S3 bucket. Now, it&#39;s time to add another AWS service into the mix: <strong>Amazon Simple Queue Service (SQS)</strong>. SQS is a fully managed message queuing service that enables you to scale microservices, distributed systems, and serverless applications. In a production-ready environment, SQS can help manage the communication between different parts of your application efficiently.</p>
+
+<p>In this stage, your mission is to create an SQS queue that will handle messages from your Lambda function. A basic Flask application is provided in the application folder of this stage. This application will handle uploading images to S3 and reading messages from the queue. You don&#39;t need to understand Flask or Python to pass this stage. Simply follow the instructions to set up your environment and ensure everything is working correctly.</p>
+
+<h2>Objectives</h2>
+
+<p>For this stage, perform the following:</p>
+
+<ul>
+  <li>Configure AWS CLI profile:&nbsp; Ensure you have a local CLI profile named <code>Hyperprofile</code>&nbsp;configured using the credentials of the <code>RekognitionAppUser</code>&nbsp;created in an earlier stage. This profile will be used by your app to upload images to Amazon S3 and read the message from the queue;</li>
+  <li>Create an SQS queue:&nbsp;Create a new SQS queue in the console&nbsp;and obtain its URL. This queue will be used to handle messages from your Lambda function;</li>
+  <li>Update Lambda function code: Update your Lambda function code with the one provided in the <a href="https://cogniterra.org/media/attachments/lesson/38306/updated_lambda_function.py" rel="noopener noreferrer nofollow">updated_lambda_function.py</a>&nbsp;file in the project files. This new code will send messages to the SQS queue. Make sure to add your SQS queue URL between the quotes in line 79: <code>queue_url = &#39;&lt;your_sqs_queue_url&gt;&#39;</code> of the function. When these changes are made, remember to Deploy them in your function;</li>
+  <li>Configure .env file:&nbsp;Open the <code>.env</code>&nbsp;file in the application folder and provide your <code>BUCKET_NAME</code>&nbsp;and <code>SQS_QUEUE_URL</code>&nbsp;in the appropriate variables. This will allow the Flask application to locate your S3 bucket and SQS queue;</li>
+  <li>Run the Flask Application:&nbsp;Open the <code>app.py</code>&nbsp;file and run it using your IDE or the command <code>python app.py</code> in the terminal. Then, open your browser and navigate to <code>http://127.0.0.1:5000</code>&nbsp;to access the application. Choose a file and click <em>Upload</em> to send it to your S3 bucket;</li>
+  <li>Verify the Results:&nbsp; After uploading an image, wait a few moments for the upload to complete. Return to the previous page to view the results, which are read from the SQS queue. This step allows you to verify that everything is working correctly;</li>
+  <li>Final image upload:&nbsp; Upload <a href="https://cogniterra.org/media/attachments/lesson/38306/avocado.jpg" rel="noopener noreferrer nofollow">this image</a> and ensure the upload is successful. However,&nbsp;do not read it from the queue. The tests will read it to verify that everything is working. Once uploaded, provide the queue URL in the&nbsp;<code>main.py</code> file and click the Check button.</li>
+</ul>
+
+<p>In your main.py file, provide the SQS queue URL as shown below:</p>
+
+<pre>
+<code>queue_url = "YOUR_SQS_QUEUE_URL"</code></pre>
+
+<p>After receiving analysis results, your application can now decide whether to allow the upload or deny it, while providing appropriate feedback to the user. This provides a robust and scalable solution for image analysis and decision-making.&nbsp;</p>
+
+<p>[ALERT-primary] While the services you created will not cost you anything as you only pay for what you use, remember to delete them to clean up your AWS environment. [/ALERT]</p>
