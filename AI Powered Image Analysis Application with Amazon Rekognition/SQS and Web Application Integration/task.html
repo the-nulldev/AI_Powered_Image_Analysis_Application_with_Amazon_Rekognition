@@ -8,7 +8,7 @@
 
 <p>By using Amazon SQS, we can decouple the image processing and decision-making components of our application, ensuring that each part can scale independently and handle varying loads efficiently. This setup also adds reliability, as messages will be stored in the queue until they are successfully processed, preventing data loss and allowing for easy recovery from failures.</p>
 
-<h4>Key Features of Amazon SQS:</h4>
+<h4>Key features:</h4>
 
 <ul>
   <li>Decoupling:&nbsp;SQS allows different components of your application to communicate and process tasks asynchronously, improving fault tolerance and scalability;</li>
@@ -18,7 +18,7 @@
   <li>Cost-effective:&nbsp;you only pay for what you use, with no upfront costs or minimum fees.</li>
 </ul>
 
-<h4>How Amazon SQS Works:</h4>
+<h4>How it all works:</h4>
 
 <p>Amazon SQS operates by allowing <strong>producers</strong> (senders) to send messages to an SQS queue. Each message can contain up to 256 KB of text in any format. Once sent, SQS stores these messages in the queue until they are retrieved by <strong>consumers</strong> (receivers) or until the retention period expires. Consumers then poll the queue to retrieve messages. After a message is processed, it is deleted from the queue to prevent further processing.</p>
 
@@ -40,7 +40,7 @@
 <pre>
 <code class="language-bash">aws sqs create-queue --queue-name MyFIFOQueue.fifo --attributes FifoQueue=true</code></pre>
 
-<p><strong style="font-size:1em; text-align:inherit">Use Cases for Amazon SQS:</strong></p>
+<p><strong style="font-size:1em; text-align:inherit">Use cases:</strong></p>
 
 <ul>
   <li>Decoupling microservices:&nbsp;Allow different parts of your application to communicate without being tightly coupled, improving fault tolerance and scalability;</li>
