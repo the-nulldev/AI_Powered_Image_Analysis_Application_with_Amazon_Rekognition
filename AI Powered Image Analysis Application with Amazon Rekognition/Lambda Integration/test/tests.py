@@ -38,7 +38,7 @@ class Test(StageTest):
         expected_function_json = {
             "FunctionName": "ImageAnalysisFunction",
             "Runtime": "python3.12",
-            "Role": "arn:aws:iam::0123456789012:role/RekognitionAccessRole",
+            "Role": "arn:aws:iam::123456789012:role/RekognitionAccessRole",
             "Handler": "lambda_function.lambda_handler",
             "Timeout": 60,
             "MemorySize": 128
