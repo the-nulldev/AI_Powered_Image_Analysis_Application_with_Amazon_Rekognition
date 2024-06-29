@@ -1,6 +1,6 @@
 type: framework
 content:
-  - "AWS Account, IAM Roles, and Policies"
+  - Account Setup
   - Amazon S3 Setup
   - Image Analysis with Amazon Rekognition
   - Lambda Integration
