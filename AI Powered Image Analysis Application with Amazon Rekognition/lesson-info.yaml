@@ -1,6 +1,6 @@
 type: framework
 content:
-  - Account Setup
+  - Account and IAM Setup
   - Amazon S3 Setup
   - Image Analysis with Amazon Rekognition
   - Lambda Integration
