@@ -1,6 +1,60 @@
+<h2>Theory</h2>
+
+<p>So far, we have integrated Amazon Rekognition and AWS Lambda to automatically analyze images uploaded to an S3 bucket. Now, let&#39;s enhance the robustness and scalability of our application by adding Amazon Simple Queue Service (Amazon SQS).</p>
+
+<p><strong>Amazon Simple Queue Service (Amazon SQS)</strong> is a fully managed message queuing service that enables you to decouple and scale microservices, distributed systems, and serverless applications. It allows you to send, store, and receive messages between software components at any volume, without losing messages or requiring other services to be available.</p>
+
+<p>Amazon SQS will act as a message broker between our AWS Lambda function and our application. When an image is uploaded to the S3 bucket and processed by Amazon Rekognition, the results of the analysis will be sent as messages to an SQS queue. Our application will then read these messages from the queue to make decisions based on the analysis results.</p>
+
+<p>By using Amazon SQS, we can decouple the image processing and decision-making components of our application, ensuring that each part can scale independently and handle varying loads efficiently. This setup also adds reliability, as messages will be stored in the queue until they are successfully processed, preventing data loss and allowing for easy recovery from failures.</p>
+
+<h4>Key Features of Amazon SQS:</h4>
+
+<ul>
+  <li>Decoupling:&nbsp;SQS allows different components of your application to communicate and process tasks asynchronously, improving fault tolerance and scalability;</li>
+  <li>Scalability:&nbsp;Automatically scales to handle any amount of traffic, from a few messages per second to thousands;</li>
+  <li>Reliability:&nbsp;Ensures that messages are delivered at least once and provides mechanisms to ensure that messages are processed in order;</li>
+  <li>Security:&nbsp;Supports encryption of messages in transit and at rest, and allows you to control access to queues using AWS Identity and Access Management (IAM) policies;</li>
+  <li>Cost-effective:&nbsp;you only pay for what you use, with no upfront costs or minimum fees.</li>
+</ul>
+
+<h4>How Amazon SQS Works:</h4>
+
+<p>Amazon SQS operates by allowing <strong>producers</strong> (senders) to send messages to an SQS queue. Each message can contain up to 256 KB of text in any format. Once sent, SQS stores these messages in the queue until they are retrieved by <strong>consumers</strong> (receivers) or until the retention period expires. Consumers then poll the queue to retrieve messages. After a message is processed, it is deleted from the queue to prevent further processing.</p>
+
+<p>A key feature of SQS is the visibility timeout. When a message is retrieved, it becomes invisible to other consumers for a specified period. This ensures that only one consumer processes the message at a time. If the message is not processed and deleted within this visibility timeout, it becomes visible again, allowing another consumer to process it. This mechanism helps ensure that messages are processed reliably and in order.</p>
+
+<p>Amazon SQS offers two types of queues to cater to different use cases: Standard queues and FIFO (First-In-First-Out) queues.&nbsp;<strong>Standard queues</strong>&nbsp;provide maximum throughput, best-effort ordering, and at least once delivery. This means that messages are delivered at least once, but occasionally more than once, and they may be delivered out of order. Standard queues are ideal for applications where the exact order of operations is not critical.</p>
+
+<p><strong>FIFO queues</strong>&nbsp;are designed to ensure that messages are processed exactly once, in the exact order they are sent. FIFO queues support deduplication, ensuring that each message is delivered and processed only once. This type of queue is ideal for applications where the order of operations is critical, such as financial transactions or inventory management systems.</p>
+
+<p>Creating an Amazon SQS queue can be done easily through the console or CLI. In the console, you can navigate to the SQS service, click on &quot;Create Queue,&quot; and follow the prompts to set up your queue, choosing between a Standard or FIFO queue based on your needs. You can also specify various configuration options such as visibility timeout, message retention period, and access policies.</p>
+
+<p>Alternatively, you can create a queue using the AWS CLI with a simple command. For example, to create a standard queue, you can use the following command:</p>
+
+<pre>
+<code class="language-bash">aws sqs create-queue --queue-name MyStandardQueue</code></pre>
+
+<p>This command will create a new standard queue named&nbsp;<code>MyStandardQueue</code>. If you need a FIFO queue, you can add the&nbsp;<code>--attributes</code>&nbsp;flag to specify that the queue is FIFO:</p>
+
+<pre>
+<code class="language-bash">aws sqs create-queue --queue-name MyFIFOQueue.fifo --attributes FifoQueue=true</code></pre>
+
+<p><strong style="font-size:1em; text-align:inherit">Use Cases for Amazon SQS:</strong></p>
+
+<ul>
+  <li>Decoupling microservices:&nbsp;Allow different parts of your application to communicate without being tightly coupled, improving fault tolerance and scalability;</li>
+  <li>Load leveling:&nbsp;Smooth out sudden spikes in traffic by buffering requests in the queue, ensuring that your application can handle varying loads;</li>
+  <li>Message prioritization:&nbsp;Use multiple queues to prioritize messages, ensuring that high-priority tasks are processed first;</li>
+  <li>Batch processing:&nbsp;Accumulate messages in the queue and process them in batches, improving efficiency and reducing costs;</li>
+  <li>Distributed systems:&nbsp;Enable communication between distributed components of your application, ensuring reliable message delivery.</li>
+</ul>
+
+<p>By leveraging Amazon SQS in our image analysis application, we can ensure that our system remains robust, scalable, and efficient. We also ensure that it is capable of handling varying loads and processing tasks asynchronously. This will ultimately lead to a more reliable and maintainable application.</p>
+
 <h2>Description</h2>
 
-<p>Now, let&#39;s finalize our AI-Powered Image Analysis Application! So far, you&#39;ve integrated Amazon Rekognition and AWS Lambda to automatically analyze images uploaded to an S3 bucket. Now, it&#39;s time to add another AWS service into the mix: <strong>Amazon Simple Queue Service (SQS)</strong>. SQS is a fully managed message queuing service that enables you to scale microservices, distributed systems, and serverless applications. In a production-ready environment, SQS can help manage the communication between different parts of your application efficiently.</p>
+<p>Now, let&#39;s finalize our AI-Powered Image Analysis Application! So far, you&#39;ve integrated Amazon Rekognition and AWS Lambda to automatically analyze images uploaded to an S3 bucket. Now, it&#39;s time to add another Amazon Simple Queue Service (SQS)&nbsp;into the mix.</p>
 
 <p>In this stage, your mission is to create an SQS queue that will handle messages from your Lambda function. A basic Flask application is provided in the application folder of this stage. This application will handle uploading images to S3 and reading messages from the queue. You don&#39;t need to understand Flask or Python to pass this stage. Simply follow the instructions to set up your environment and ensure everything is working correctly.</p>
 
@@ -12,7 +66,7 @@
   <li>Configure AWS CLI profile:&nbsp; Ensure you have a local CLI profile named <code>Hyperprofile</code>&nbsp;configured using the credentials of the <code>RekognitionAppUser</code>&nbsp;created in an earlier stage. This profile will be used by your app to upload images to Amazon S3 and read the message from the queue;</li>
   <li>Create an SQS queue:&nbsp;Create a new SQS queue in the console&nbsp;and obtain its URL. This queue will be used to handle messages from your Lambda function;</li>
   <li>Update Lambda function code: Update your Lambda function code with the one provided in the <a href="https://cogniterra.org/media/attachments/lesson/38306/updated_lambda_function.py" rel="noopener noreferrer nofollow">updated_lambda_function.py</a>&nbsp;file in the project files. This new code will send messages to the SQS queue. Make sure to add your SQS queue URL between the quotes in line 79: <code>queue_url = &#39;&lt;your_sqs_queue_url&gt;&#39;</code> of the function. When these changes are made, remember to Deploy them in your function;</li>
-  <li>Configure .env file:&nbsp;Open the <code>.env</code>&nbsp;file in the application folder and provide your <code>BUCKET_NAME</code>&nbsp;and <code>SQS_QUEUE_URL</code>&nbsp;in the appropriate variables. This will allow the Flask application to locate your S3 bucket and SQS queue;</li>
+  <li>Configure .env file:&nbsp;Open the <code>.env</code>&nbsp;file in the application folder and provide your <code>BUCKET_NAME</code>&nbsp;and <code>SQS_URL</code>&nbsp;in the appropriate variables. This will allow the Flask application to locate your S3 bucket and SQS queue;</li>
   <li>Run the Flask Application:&nbsp;Open the <code>app.py</code>&nbsp;file and run it using your IDE or the command <code>python app.py</code> in the terminal. Then, open your browser and navigate to <code>http://127.0.0.1:5000</code>&nbsp;to access the application. Choose a file and click <em>Upload</em> to send it to your S3 bucket;</li>
   <li>Verify the Results:&nbsp; After uploading an image, wait a few moments for the upload to complete. Return to the previous page to view the results, which are read from the SQS queue. This step allows you to verify that everything is working correctly;</li>
   <li>Final image upload:&nbsp; Upload <a href="https://cogniterra.org/media/attachments/lesson/38306/avocado.jpg" rel="noopener noreferrer nofollow">this image</a> and ensure the upload is successful. However,&nbsp;do not read it from the queue. The tests will read it to verify that everything is working. Once uploaded, provide the queue URL in the&nbsp;<code>main.py</code> file and click the Check button.</li>
@@ -21,7 +75,7 @@
 <p>In your main.py file, provide the SQS queue URL as shown below:</p>
 
 <pre>
-<code class="language-bash">queue_url = "YOUR_SQS_QUEUE_URL"</code></pre>
+<code>queue_url = "YOUR_SQS_QUEUE_URL"</code></pre>
 
 <p>After receiving analysis results, your application can now decide whether to allow the upload or deny it, while providing appropriate feedback to the user. This provides a robust and scalable solution for image analysis and decision-making.&nbsp;</p>
 
