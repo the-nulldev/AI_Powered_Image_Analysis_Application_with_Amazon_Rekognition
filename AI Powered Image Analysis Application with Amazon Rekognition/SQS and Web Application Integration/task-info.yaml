@@ -1,19 +1,14 @@
 type: edu
 files:
-  - name: application/app.py
-    visible: true
-  - name: application/templates/upload.html
-    visible: true
-  - name: application/templates/display.html
-    visible: true
-  - name: application/__init__.py
+  - name: app.py
     visible: true
   - name: test/tests.py
-    visible: true
+    visible: false
   - name: test/__init__.py
-    visible: true
+    visible: false
   - name: tests.py
     visible: false
+    propagatable: false
   - name: updated_lambda_function.py
     visible: true
   - name: main.py

@@ -3,4 +3,4 @@ Please provide the URL of the SQS queue you created between the double quotes be
 Do not change the variable name or the double quotes surrounding the URL.
 """
 
-queue_url = ""
+queue_url = "<your-sqs-queue-url>"

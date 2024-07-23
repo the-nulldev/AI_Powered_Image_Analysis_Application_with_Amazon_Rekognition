@@ -2,7 +2,6 @@ import json
 
 from hstest import StageTest, CheckResult, dynamic_test
 
-
 def import_function_json():
     try:
         from main import function_json
@@ -35,18 +34,17 @@ class Test(StageTest):
         if function_json == "invalid":
             return CheckResult.wrong("The 'function_json' variable is not a valid JSON string. Please ensure it is not empty and is correctly formatted.")
 
-        expected_function_json = {
-            "FunctionName": "ImageAnalysisFunction",
-            "Runtime": "python3.12",
-            "Role": "arn:aws:iam::123456789012:role/RekognitionAccessRole",
-            "Handler": "lambda_function.lambda_handler",
-            "Timeout": 60,
-            "MemorySize": 128
-        }
+        expected_function_json = [
+            "ImageAnalysisFunction",
+            "python3.12",
+            "arn:aws:iam::123456789012:role/RekognitionAccessRole",
+            "lambda_function.lambda_handler",
+            60,
+            128
+        ]
 
-        for key, value in expected_function_json.items():
-            if function_json.get(key) != value:
-                return CheckResult.wrong(f"The '{key}' in 'function_json' is incorrect. Got '{function_json.get(key)}' which is not the expected value. Verify that the function configuration is correct.")
+        if function_json != expected_function_json:
+            return CheckResult.wrong(f"The 'function_json' is incorrect. Got '{function_json}' which is not the expected value. Verify that the function configuration is correct.")
 
         return CheckResult.correct()
 

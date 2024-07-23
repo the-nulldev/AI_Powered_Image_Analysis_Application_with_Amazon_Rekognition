@@ -1,14 +1,13 @@
 import json
 import os
 import re
+import dotenv
 import time
 
 import boto3
-from dotenv import load_dotenv
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template_string
 
-# Load environment variables from .env file
-load_dotenv()
+dotenv.load_dotenv()
 
 app = Flask(__name__)
 
@@ -16,16 +15,19 @@ app = Flask(__name__)
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 
 # AWS S3 and SQS Configuration
-S3_BUCKET = os.getenv('BUCKET_NAME')
-AWS_REGION = os.getenv('AWS_REGION')
-SQS_QUEUE_URL = os.getenv('SQS_QUEUE_URL')
+S3_BUCKET = "<your-s3-bucket-name>"
+SQS_QUEUE_URL = "<your-sqs-queue-url>"
+
+# Validate S3 bucket name
+if not S3_BUCKET or not re.match(r'^[a-zA-Z0-9.\-_]{1,255}$', S3_BUCKET):
+    raise ValueError("Invalid S3 bucket name. Ensure the S3_BUCKET variable is set correctly.")
 
 # Initialize Boto3 session
 session = boto3.Session(
     profile_name='Hyperprofile',
     aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
     aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    region_name=AWS_REGION
+    region_name="us-east-1"
 )
 
 s3_client = session.client('s3')
@@ -48,7 +50,28 @@ def secure_filename(filename):
 
 @app.route('/')
 def index():
-    return render_template('upload.html')
+    upload_form = '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Upload Image</title>
+    </head>
+    <body>
+    <h1>Upload Image</h1>
+    <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit="Upload">
+    </form>
+    <br>
+    <h1>Retrieve Analysis Results</h1>
+    <form action="{{ url_for('retrieve_results') }}" method="get">
+        <input type="submit" value="Retrieve">
+    </form>
+    </body>
+    </html>
+    '''
+    return render_template_string(upload_form)
 
 
 @app.route('/upload', methods=['POST'])
@@ -62,7 +85,6 @@ def upload_file():
         filename = secure_filename(file.filename)
 
         try:
-            # Upload to S3
             s3_client.upload_fileobj(file, S3_BUCKET, filename)
         except Exception as e:
             return f"Failed to upload file to S3: {str(e)}", 500
@@ -75,25 +97,40 @@ def upload_file():
 def retrieve_results():
     # Poll the SQS queue to retrieve the analysis results
     analysis_result = None
-    for _ in range(10):  # Polling up to 10 times
+    for _ in range(5):  # Polling up to 5 times
         response = sqs_client.receive_message(
             QueueUrl=SQS_QUEUE_URL,
-            MaxNumberOfMessages=1,
-            WaitTimeSeconds=5
+            MaxNumberOfMessages=10,  # Receive multiple messages
+            WaitTimeSeconds=5,
+            AttributeNames=['SentTimestamp']
         )
         messages = response.get('Messages', [])
         if messages:
-            message = messages[0]
-            analysis_result = json.loads(message['Body'])
+            # Find the latest message based on the SentTimestamp attribute
+            latest_message = max(messages, key=lambda msg: int(msg['Attributes']['SentTimestamp']))
+            analysis_result = json.loads(latest_message['Body'])
             sqs_client.delete_message(
                 QueueUrl=SQS_QUEUE_URL,
-                ReceiptHandle=message['ReceiptHandle']
+                ReceiptHandle=latest_message['ReceiptHandle']
             )
             break
         time.sleep(1)  # Wait for 1 second before retrying
 
     if analysis_result:
-        return render_template('display.html', analysis_result=analysis_result)
+        display_template = '''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Analysis Results</title>
+        </head>
+        <body>
+        <h1>Analysis Results</h1>
+        <pre>{{ analysis_result | tojson(indent=2) }}</pre>
+        </body>
+        </html>
+        '''
+        return render_template_string(display_template, analysis_result=analysis_result)
     else:
         return "Analysis results not found. Please try again.", 404
 
